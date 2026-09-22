@@ -4,41 +4,30 @@ from playwright_stealth import Stealth
 
 AUTH_FILE = "job_state.json"
 
-def scrape_jobs():
+def inspect_feed():
     with Stealth().use_sync(sync_playwright()) as p:
         browser = p.chromium.launch(
+            channel="chrome",
             headless=False,
-            args=[
-                "--disable-blink-features=AutomationControlled",
-                "--start-maximized"
-            ]
+            args=["--disable-blink-features=AutomationControlled"]
         )
         context = browser.new_context(
             storage_state=AUTH_FILE,
             viewport={"width": 1440, "height": 900}
         )
         page = context.new_page()
-        print("Navigating to Wellfound jobs")
 
+        print("Opening Wellfound jobs with saved session...")
         page.goto("https://wellfound.com/jobs", wait_until="domcontentloaded")
-        print("Waiting for feed hydration")
-        page.wait_for_timeout(6000)
-        job_card_locator = page.locator("article, [data-test='JobCard'], div[class*='styles_jobCard']").first
-        
-        try:
-            job_card_locator.wait_for(timeout=15000)
-            print("Job feed rendered successfully!")
-        except Exception:
-            print("Cards did not render in time. Checking page status")
-            page.screenshot(path="debug_feed.png")
-            browser.close()
-            return []
-        scraped_jobs = []
-        cards = page.locator("article, div[class*='styles_jobCard']").all()
-        print(f"Found {len(cards)} listings.")
+
+        time.sleep(5)
+
+        print("\nOpening Playwright Inspector")
+        print("1. Click the 'Pick locator' button in the Inspector window.")
+        print("2. Hover over a job card and note the selector.")
+        page.pause()
 
         browser.close()
-        return scraped_jobs
 
 if __name__ == "__main__":
-    scrape_jobs()
+    inspect_feed()
