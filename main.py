@@ -7,26 +7,26 @@ AUTH_FILE = "job_state.json"
 def authenticate_wellfound():
     with Stealth().use_sync(sync_playwright()) as p:
         browser = p.chromium.launch(
-            headless=False, 
+            channel="chrome",
+            headless=False,
             args=["--disable-blink-features=AutomationControlled"]
         )
-        
-        if os.path.exists(AUTH_FILE):
-            context = browser.new_context(storage_state=AUTH_FILE)
-            print("Session loaded.")
-        else:
-            context = browser.new_context()
-            print("Manual login required.")
-            
+        context = browser.new_context(viewport={"width": 1440, "height": 900})
         page = context.new_page()
-        page.goto("https://wellfound.com/jobs")
-        
-        if not os.path.exists(AUTH_FILE):
-            print("Please log in to Wellfound in the opened browser")
-            page.wait_for_url("https://wellfound.com/jobs*", timeout=120000)
-            context.storage_state(path=AUTH_FILE)
-            print(f"Session cookies saved to {AUTH_FILE}")
-            
+
+        print("Navigating to Wellfound login")
+        page.goto("https://wellfound.com/login")
+
+        print("ACTION REQUIRED:")
+        print("1. Complete your login in the opened Chrome window.")
+        print("2. Ensure you are on your jobs feed or candidate dashboard.")
+        print("3. Return here and press Enter to save your cookies.")
+
+        input("Press Enter here AFTER you have successfully logged in: ")
+
+        context.storage_state(path=AUTH_FILE)
+        print(f"\nAuthenticated session successfully saved to {AUTH_FILE}")
+
         browser.close()
 
 if __name__ == "__main__":

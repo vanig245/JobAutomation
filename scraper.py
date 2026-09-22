@@ -6,50 +6,39 @@ AUTH_FILE = "job_state.json"
 
 def scrape_jobs():
     with Stealth().use_sync(sync_playwright()) as p:
-        browser = p.chromium.launch(headless=False)
-        context = browser.new_context(storage_state=AUTH_FILE)
+        browser = p.chromium.launch(
+            headless=False,
+            args=[
+                "--disable-blink-features=AutomationControlled",
+                "--start-maximized"
+            ]
+        )
+        context = browser.new_context(
+            storage_state=AUTH_FILE,
+            viewport={"width": 1440, "height": 900}
+        )
         page = context.new_page()
+        print("Navigating to Wellfound jobs")
 
-        page.goto("https://wellfound.com/jobs")
+        page.goto("https://wellfound.com/jobs", wait_until="domcontentloaded")
+        print("Waiting for feed hydration")
+        page.wait_for_timeout(6000)
+        job_card_locator = page.locator("article, [data-test='JobCard'], div[class*='styles_jobCard']").first
         
-        print("Waiting for job feed to load")
-
         try:
-            page.wait_for_selector("[data-test='JobCard']", timeout=20000)
+            job_card_locator.wait_for(timeout=15000)
+            print("Job feed rendered successfully!")
         except Exception:
-            print("Timeout: Could not find job cards. Ensure your selector is correct.")
+            print("Cards did not render in time. Checking page status")
+            page.screenshot(path="debug_feed.png")
             browser.close()
             return []
-            
-        jobs = []
-        job_cards = page.locator("[data-test='JobCard']").all()
-        print(f"Found {len(job_cards)} job cards. Extracting data...")
-        
-        for card in job_cards:
-            try:
-                card.click()
-                time.sleep(1)
+        scraped_jobs = []
+        cards = page.locator("article, div[class*='styles_jobCard']").all()
+        print(f"Found {len(cards)} listings.")
 
-                title = card.locator("h2").first.inner_text()
-                company = card.locator("h4").first.inner_text()
-                apply_url = card.locator("a").first.get_attribute("href")
-                description = page.locator(".styles_description__3v_3m").first.inner_text()
-                
-                jobs.append({
-                    "title": title,
-                    "company": company,
-                    "url": f"https://wellfound.com{apply_url}" if apply_url.startswith("/") else apply_url,
-                    "description": description
-                })
-                print(f"Extracted: {title} at {company}")
-                
-            except Exception as e:
-                print(f"Skipped a card: missing required elements.")
-                continue
-                
         browser.close()
-        return jobs
+        return scraped_jobs
 
 if __name__ == "__main__":
-    extracted_data = scrape_jobs()
-    print(f"\nTotal jobs successfully parsed: {len(extracted_data)}")
+    scrape_jobs()
