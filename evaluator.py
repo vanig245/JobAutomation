@@ -13,13 +13,21 @@ def evaluate_jobs(scraped_jobs, resume_text):
     for job in scraped_jobs:
         print(f"Evaluating: {job['title']} at {job['company']}")
         
-        prompt = f"""x
-        You are an expert technical recruiter. Evaluate the Job Description against the Resume.
-        
-        Rules:
-        1. 'score': Rate the match from 0 to 100.
-        2. 'apply': True if score > 75, False otherwise.
-        3. 'pitch': If apply is True, write a concise 2-sentence technical pitch (max 300 chars) explaining why the candidate is a perfect fit. If False, return an empty string.
+        prompt = f"""
+        You are a highly critical technical recruiter. Evaluate the candidate's resume against the provided job description.
+
+        SCORING RUBRIC (0-100):
+        - Start at 0.
+        - Add points ONLY for exact technical skill matches.
+        - Deduct points heavily if years of experience do not match or if the candidate lacks core required frameworks.
+        - Be harsh. A standard match should score around 50-60. Only true perfect matches should score above 75.
+
+        OUTPUT RULES:
+        1. 'score': Integer between 0 and 100 based on the strict rubric.
+        2. 'apply': Boolean True if score is 75 or higher, else False.
+        3. 'pitch': If apply is True, write a highly technical, 2-sentence cover note in the FIRST PERSON perspective (using "I", "my"). 
+           - NEVER use the name "Vani" or refer to the candidate in the third person. 
+           - Example: "I want to apply for this role because my experience building LangGraph state machines directly aligns with your need for AI agents."
         
         Resume: {resume_text}
         
