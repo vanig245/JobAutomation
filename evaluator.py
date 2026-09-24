@@ -49,9 +49,6 @@ def evaluate_jobs(scraped_jobs, resume_text):
                 print(f"Pitch: {evaluation.pitch}")
                 job.update(evaluation.model_dump())
                 approved_jobs.append(job)
-                
-            print("-" * 40)
-                
         except Exception as e:
             print(f"Evaluation failed for {job['title']}: {e}")
             
