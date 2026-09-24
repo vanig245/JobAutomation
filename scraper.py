@@ -29,7 +29,8 @@ def scrape_jobs():
             browser.close()
             return []
 
-        buttons = page.locator("button[data-test='LearnMoreButton']").all()
+        all_buttons = page.locator("button[data-test='LearnMoreButton']").all()
+        buttons = all_buttons[:10]
         print(f"Found {len(buttons)} jobs in feed. Extracting details...\n")
 
         scraped_jobs = []
