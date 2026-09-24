@@ -1,5 +1,6 @@
 from scraper import scrape_jobs
 from evaluator import evaluate_jobs
+from applier import apply_to_jobs
 
 def run_agent():
     print("Step 1: Launching Playwright to scrape Wellfound")
@@ -59,10 +60,13 @@ def run_agent():
     - Head of Publicity, Kritrim Dhi (2024 - Present)
     - Tech Member, GeeksforGeeks ADGIPS (2024 - Present)
     """
+
     approved_jobs = evaluate_jobs(live_jobs, my_resume)
     print(f"Total jobs approved for auto-apply: {len(approved_jobs)}")
     for job in approved_jobs:
-        print(f" {job['company']} - {job['title']} (Score: {job['score']})")
+        print(f"{job['company']} - {job['title']} (Score: {job['score']})")
 
+    print("\nStep 3: Launching Auto-Applier (DRY RUN MODE)")
+    applied = apply_to_jobs(approved_jobs, dry_run=False)
 if __name__ == "__main__":
     run_agent()
