@@ -37,6 +37,12 @@ def apply_to_jobs(approved_jobs, dry_run=True):
 
                 apply_button.click()
                 time.sleep(2.0)
+
+                relocate_option = page.locator("label:has-text('relocate')").first
+                if relocate_option.is_visible():
+                    print("Location mismatch detected. Clicking 'willing to relocate'")
+                    relocate_option.click(force=True)
+                    time.sleep(1.0)
                 note_box = page.locator("textarea[name='userNote'], textarea[placeholder*='note'], textarea").first
                 if note_box.count() > 0 and note_box.is_visible():
                     if note_box.is_enabled():
@@ -44,7 +50,7 @@ def apply_to_jobs(approved_jobs, dry_run=True):
                         note_box.click(force=True)
                         note_box.type(job["pitch"], delay=25)
                     else:
-                        print("Pitch box is locked/disabled. Skipping pitch injection.")
+                        print("Pitch box is locked or disabled. Skipping pitch injection.")
                 else:
                     print("No text box found for a pitch.")
                 submit_button = page.locator("button:has-text('Send application'), button:has-text('Submit application')").first
