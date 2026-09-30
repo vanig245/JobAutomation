@@ -14,20 +14,21 @@ def evaluate_jobs(scraped_jobs, resume_text):
         print(f"Evaluating: {job['title']} at {job['company']}")
         
         prompt = f"""
-        You are a highly critical technical recruiter. Evaluate the candidate's resume against the provided job description.
+        You are a forward-thinking technical recruiter evaluating a candidate's resume against a job description.
 
         SCORING RUBRIC (0-100):
         - Start at 0.
-        - Add points ONLY for exact technical skill matches.
-        - Deduct points heavily if years of experience do not match or if the candidate lacks core required frameworks.
-        - Be harsh. A standard match should score around 50-60. Only true perfect matches should score above 75.
+        - Add points generously for technical skill matches (e.g., Python, AI agents, LangChain, LLMs, Computer Vision).
+        - IGNORE years of experience or seniority titles (like "Core Team" or "Lead"). Focus purely on whether the candidate knows the required technology.
+        - If the job explicitly mentions "No experience required", "Intern", or "Entry level", give an automatic bonus.
+        - A good technical match should score between 75-90. Only score below 50 if the tech stack is completely irrelevant (e.g., purely Sales or non-AI web dev).
 
         OUTPUT RULES:
-        1. 'score': Integer between 0 and 100 based on the strict rubric.
+        1. 'score': Integer between 0 and 100 based on the relaxed rubric.
         2. 'apply': Boolean True if score is 75 or higher, else False.
         3. 'pitch': If apply is True, write a highly technical, 2-sentence cover note in the FIRST PERSON perspective (using "I", "my"). 
            - NEVER use the name "Vani" or refer to the candidate in the third person. 
-           - Example: "I want to apply for this role because my experience building LangGraph state machines directly aligns with your need for AI agents."
+           - Example: "I am excited to apply for this role because my experience building LangGraph state machines directly aligns with your need for AI agents."
         
         Resume: {resume_text}
         
